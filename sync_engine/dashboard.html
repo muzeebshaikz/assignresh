@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Onboarding sync - demo dashboard</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+ body{font:14px/1.45 system-ui,sans-serif;margin:0;background:#f5f6f8;color:#1b1f24}
+ header{background:#1b2a41;color:#fff;padding:14px 20px} header small{opacity:.75}
+ main{padding:16px 20px;max-width:1300px;margin:auto}
+ .card{background:#fff;border:1px solid #dde1e6;border-radius:8px;padding:12px 14px;margin-bottom:14px}
+ h2{margin:0 0 8px;font-size:15px} h3{margin:10px 0 4px;font-size:13px;color:#444}
+ button{border:1px solid #1b2a41;background:#fff;border-radius:6px;padding:6px 10px;margin:3px;cursor:pointer;font-size:13px}
+ button:hover{background:#e8eef7} .ok{background:#1f7a3d;color:#fff;border-color:#1f7a3d} .no{background:#b3261e;color:#fff;border-color:#b3261e}
+ table{border-collapse:collapse;width:100%;font-size:12.5px} td,th{border-bottom:1px solid #eceff3;padding:4px 6px;text-align:left;vertical-align:top}
+ .done{color:#1f7a3d;font-weight:600}.failed_permanent,.failed_transient{color:#b3261e;font-weight:600}.pending{color:#9a6700}
+ .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+ pre{margin:0;white-space:pre-wrap;font-size:11.5px;background:#f6f8fa;padding:6px;border-radius:6px;max-height:210px;overflow:auto}
+ .tag{display:inline-block;background:#eef;border-radius:10px;padding:1px 8px;font-size:12px}
+ .hint{color:#555;margin:2px 0 8px}
+</style></head><body>
+<header><b>Onboarding sync engine</b> &nbsp;<small id="meta"></small></header>
+<main>
+ <div class="card"><h2>1. Pick a scenario (simulates a change arriving from Ashby / Workday)</h2>
+  <div class="hint">Run them in order S1 to S8. Everything is mocked; nothing leaves this machine.</div>
+  <div id="scen"></div><button onclick="reset()">Reset all data</button>
+  <h3>What just happened</h3><pre id="last">(nothing yet)</pre></div>
+ <div class="card"><h2>2. Human approvals needed (this is what the Slack buttons would do)</h2><div id="exc"></div></div>
+ <div class="card"><h2>3. What each system now contains</h2><div class="grid" id="systems"></div></div>
+ <div class="card"><h2>4. Write ledger (every attempted change; replays never add rows)</h2><div id="ledger"></div></div>
+ <div class="grid"><div class="card"><h2>5. Slack messages sent</h2><pre id="slack"></pre></div>
+ <div class="card"><h2>6. Audit trail (newest first)</h2><pre id="audit"></pre></div></div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;"}[c]));
+async function j(u, o) { const r = await fetch(u, o); return r.json(); }
+async function run(id) {
+  $("last").textContent = "running " + id + " ...";
+  const r = await j("/ui/run/" + id, {method: "POST"});
+  $("last").textContent = r.map(x => x.event + ": " + x.outcome + " hire=" + x.hire +
+    "\n   ops: " + (x.ops.join(", ") || "none") + "\n   exceptions: " + (x.exceptions.join(", ") || "none") +
+    (x.warnings.length ? "\n   warnings: " + x.warnings.join("; ") : "")).join("\n\n");
+  refresh();
+}
+async function reset() { await j("/ui/reset", {method: "POST"}); $("last").textContent = "data wiped"; refresh(); }
+async function resolve(c, d) {
+  await j("/exceptions/" + c + "/resolve", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({decision: d})});
+  refresh();
+}
+async function refresh() {
+  const s = await j("/ui/state");
+  $("meta").textContent = "today pinned to " + s.today + " | Claude mode: " + (s.claude_mode === "claude" ? "live API" : "offline fallback (needs human)");
+  $("exc").innerHTML = s.exceptions.length ? "<table><tr><th>case</th><th>hire</th><th>kind</th><th>status</th><th>Claude says</th><th></th></tr>" +
+    s.exceptions.map(e => "<tr><td>" + e.case_id + "</td><td>" + e.hire_id + "</td><td>" + e.kind + "</td><td>" + e.status + "</td><td>" +
+      (e.decision ? esc(e.decision.decision + " (" + e.decision.mode + ", conf " + e.decision.confidence + ")") : "rules only") + "</td><td>" +
+      (e.status === "awaiting_human" ? "<button class='ok' onclick=\"resolve('" + e.case_id + "','approve')\">Approve</button><button class='no' onclick=\"resolve('" + e.case_id + "','reject')\">Reject</button>" : "") +
+      "</td></tr>").join("") + "</table>" : "<i>none</i>";
+  $("systems").innerHTML = Object.entries(s.systems).map(([n, r]) =>
+    "<div><h3>" + n + " <span class='tag'>" + Object.keys(r).length + " records</span></h3><pre>" + esc(JSON.stringify(r, null, 1)) + "</pre></div>").join("");
+  $("ledger").innerHTML = "<table><tr><th>hire</th><th>system</th><th>action</th><th>status</th><th>attempts</th><th>error</th></tr>" +
+    s.ledger.map(l => "<tr><td>" + l.hire_id + "</td><td>" + l.system + "</td><td>" + l.action + "</td><td class='" + l.status + "'>" + l.status +
+      "</td><td>" + l.attempts + "</td><td>" + esc(l.last_error || "") + "</td></tr>").join("") + "</table>";
+  $("slack").textContent = s.slack.join("\n\n") || "(none)";
+  $("audit").textContent = s.audit.map(a => "#" + a.id + " " + (a.hire_id || "-") + " " + a.stage + "  " + a.detail_json.slice(0, 110)).join("\n");
+}
+(async () => {
+  const sc = await j("/ui/scenarios");
+  $("scen").innerHTML = sc.map(x => "<button onclick=\"run('" + x.id + "')\" title=\"" + esc(x.title) + "\"><b>" + x.id + "</b> " + esc(x.title.slice(0, 46)) + "</button>").join("");
+  refresh();
+})();
+</script></body></html>

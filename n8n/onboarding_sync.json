@@ -1,0 +1,23 @@
+{
+  "name": "Onboarding sync (orchestration only)",
+  "notes": "n8n only triggers and forwards. The sync engine (FastAPI) owns validation, idempotency and state. UNTESTED import: node parameters were written by hand against n8n's JSON format.",
+  "nodes": [
+    {"id": "1", "name": "Ashby/Workday Webhook", "type": "n8n-nodes-base.webhook", "typeVersion": 1, "position": [0, 0],
+     "parameters": {"httpMethod": "POST", "path": "hire-event", "options": {"rawBody": true}}},
+    {"id": "2", "name": "POST /events", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [300, 0],
+     "parameters": {"method": "POST", "url": "http://localhost:8000/events", "sendBody": true, "contentType": "raw",
+                    "rawContentType": "application/json", "body": "={{ $json.rawBody }}", "sendHeaders": true,
+                    "headerParameters": {"parameters": [{"name": "X-Signature", "value": "={{ $env.SYNC_SIGNATURE }}"}]}}},
+    {"id": "3", "name": "Every morning", "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1, "position": [0, 300],
+     "parameters": {"rule": {"interval": [{"field": "hours", "hoursInterval": 24}]}}},
+    {"id": "4", "name": "GET /exceptions", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [300, 300],
+     "parameters": {"method": "GET", "url": "http://localhost:8000/exceptions?status=awaiting_human"}},
+    {"id": "5", "name": "Slack summary", "type": "n8n-nodes-base.slack", "typeVersion": 2, "position": [600, 300],
+     "parameters": {"channel": "#onboarding-exceptions", "text": "={{ $json.length }} onboarding exceptions awaiting a human"}}
+  ],
+  "connections": {
+    "Ashby/Workday Webhook": {"main": [[{"node": "POST /events", "type": "main", "index": 0}]]},
+    "Every morning": {"main": [[{"node": "GET /exceptions", "type": "main", "index": 0}]]},
+    "GET /exceptions": {"main": [[{"node": "Slack summary", "type": "main", "index": 0}]]}
+  }
+}

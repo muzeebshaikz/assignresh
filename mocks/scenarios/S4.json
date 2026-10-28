@@ -1,0 +1,42 @@
+{
+  "id": "S4",
+  "title": "Off-cycle hire created only in Workday",
+  "setup": {},
+  "events": [
+    {
+      "event_id": "evt-s4-001",
+      "source": "workday",
+      "event_type": "hire.created",
+      "source_version": 1,
+      "occurred_at": "2026-11-01T10:00:00Z",
+      "payload": {
+        "worker": {
+          "workerId": "WD-6102",
+          "legalName": {
+            "first": "Priya",
+            "last": "Nair"
+          },
+          "preferredName": null,
+          "contactEmail": "priya.nair@example.com",
+          "hireDate": "2026-11-30",
+          "managerEmail": "dana.cho@betterup.co",
+          "department": "Coaching",
+          "workerType": "Employee",
+          "workLocation": {
+            "city": "Bengaluru",
+            "country": "IN",
+            "remote": false
+          },
+          "homeAddress": {
+            "line1": "4 MG Road",
+            "line2": null,
+            "city": "Bengaluru",
+            "state": "KA",
+            "postalCode": "560001",
+            "country": "IN"
+          }
+        }
+      }
+    }
+  ]
+}

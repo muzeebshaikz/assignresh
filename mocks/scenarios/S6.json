@@ -1,0 +1,54 @@
+{
+  "id": "S6",
+  "title": "Equipment 503 x2 then OK; Okta 409 permanent; Lumos/Tracker unaffected",
+  "setup": {
+    "failures": {
+      "equipment": {
+        "fail_first_calls": 2,
+        "status": 503
+      },
+      "okta": {
+        "conflict_logins": [
+          "sam.lee@betterup.co"
+        ]
+      }
+    }
+  },
+  "events": [
+    {
+      "event_id": "evt-s6-001",
+      "source": "ashby",
+      "event_type": "hire.created",
+      "source_version": 1,
+      "occurred_at": "2026-11-01T09:00:00Z",
+      "payload": {
+        "candidate": {
+          "id": "cand-sam",
+          "firstName": "Sam",
+          "lastName": "Lee",
+          "preferredName": null,
+          "email": "sam.lee@example.com"
+        },
+        "offer": {
+          "startDate": "2026-12-07",
+          "department": "Coaching",
+          "employmentType": "FTE",
+          "hiringManagerEmail": "dana.cho@betterup.co"
+        },
+        "location": {
+          "city": "Austin",
+          "country": "US",
+          "remote": false
+        },
+        "shippingAddress": {
+          "line1": "12 Congress Ave",
+          "line2": null,
+          "city": "Austin",
+          "state": "TX",
+          "postalCode": "78701",
+          "country": "US"
+        }
+      }
+    }
+  ]
+}

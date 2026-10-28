@@ -1,0 +1,77 @@
+{
+  "id": "S3",
+  "title": "Ashby 'Jon Smith' vs Workday 'Jonathan Smyth' (V7 -> Claude -> Slack)",
+  "setup": {},
+  "events": [
+    {
+      "event_id": "evt-s3-001",
+      "source": "ashby",
+      "event_type": "hire.created",
+      "source_version": 1,
+      "occurred_at": "2026-11-01T09:00:00Z",
+      "payload": {
+        "candidate": {
+          "id": "cand-jon",
+          "firstName": "Jon",
+          "lastName": "Smith",
+          "preferredName": null,
+          "email": "jon.smith@example.com"
+        },
+        "offer": {
+          "startDate": "2026-11-23",
+          "department": "Coaching",
+          "employmentType": "FTE",
+          "hiringManagerEmail": "dana.cho@betterup.co"
+        },
+        "location": {
+          "city": "Austin",
+          "country": "US",
+          "remote": false
+        },
+        "shippingAddress": {
+          "line1": "12 Congress Ave",
+          "line2": null,
+          "city": "Austin",
+          "state": "TX",
+          "postalCode": "78701",
+          "country": "US"
+        }
+      }
+    },
+    {
+      "event_id": "evt-s3-002",
+      "source": "workday",
+      "event_type": "hire.created",
+      "source_version": 1,
+      "occurred_at": "2026-11-01T10:00:00Z",
+      "payload": {
+        "worker": {
+          "workerId": "WD-5521",
+          "legalName": {
+            "first": "Jonathan",
+            "last": "Smyth"
+          },
+          "preferredName": null,
+          "contactEmail": "jon.smith@example.com",
+          "hireDate": "2026-11-23",
+          "managerEmail": "dana.cho@betterup.co",
+          "department": "Coaching",
+          "workerType": "Employee",
+          "workLocation": {
+            "city": "Austin",
+            "country": "US",
+            "remote": false
+          },
+          "homeAddress": {
+            "line1": "12 Congress Ave",
+            "line2": null,
+            "city": "Austin",
+            "state": "TX",
+            "postalCode": "78701",
+            "country": "US"
+          }
+        }
+      }
+    }
+  ]
+}

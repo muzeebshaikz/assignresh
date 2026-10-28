@@ -1,0 +1,46 @@
+{
+  "id": "S7",
+  "title": "Address change after laptop shipped -> exception, no equipment write",
+  "setup": {
+    "mark_shipped": [
+      "H-1001"
+    ]
+  },
+  "events": [
+    {
+      "event_id": "evt-s7-001",
+      "source": "ashby",
+      "event_type": "hire.updated",
+      "source_version": 3,
+      "occurred_at": "2026-11-03T09:00:00Z",
+      "payload": {
+        "candidate": {
+          "id": "cand-alex",
+          "firstName": "Alex",
+          "lastName": "Rivera",
+          "preferredName": null,
+          "email": "alex.rivera@example.com"
+        },
+        "offer": {
+          "startDate": "2026-11-09",
+          "department": "Coaching",
+          "employmentType": "FTE",
+          "hiringManagerEmail": "dana.cho@betterup.co"
+        },
+        "location": {
+          "city": "Austin",
+          "country": "US",
+          "remote": false
+        },
+        "shippingAddress": {
+          "line1": "900 Lamar Blvd",
+          "line2": null,
+          "city": "Austin",
+          "state": "TX",
+          "postalCode": "78703",
+          "country": "US"
+        }
+      }
+    }
+  ]
+}

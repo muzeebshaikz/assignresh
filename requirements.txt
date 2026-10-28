@@ -1,0 +1,8 @@
+pydantic>=2.5
+rich>=13
+pytest>=7
+anthropic>=0.40   # optional: demo/tests run without it
+fastapi>=0.110
+uvicorn>=0.29
+httpx>=0.27       # tests + demo_api.py
+mcp>=1.2,<2       # optional (mcp_server.py); FastMCP was renamed in v2
